@@ -5,13 +5,15 @@
   "scripts": {
     "start": "npm run serve",
     "serve": "webpack serve --mode development",
-    "build": "webpack --mode production"
+    "build": "webpack --mode production",
+    "update:shared": "npm i npm-shared-shift-publisher"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@babel/runtime": "^7.14.6",
+    "npm-shared-shift-publisher": "^0.2.3",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-redux": "^7.2.4",
