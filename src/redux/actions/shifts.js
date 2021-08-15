@@ -6,3 +6,17 @@ export function getShifts(shifts) {
         payload: shifts,
     }
 }
+
+export function getUsers(users) {
+    return {
+        type: type.GET_USERS_REQUESTED,
+        payload: users,
+    }
+}
+
+export function addToDbReqShift(reqShiftForm) {
+    return {
+        type: type.ADD_REQ_SHIFT_REQUESTED,
+        payload: reqShiftForm,
+    }
+}
