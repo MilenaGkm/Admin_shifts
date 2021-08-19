@@ -68,92 +68,69 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const useStyles2 = makeStyles((theme) => ({
-    root: {
-        display: "flex",
-        flexWrap: "wrap",
-        // flex-direction: column
-        justifyontent: "space-around",
-    },
-    cb: {
-        display: "flex",
-        flexWrap: "wrap",
-        // flex-direction: column
-        justifyontent: "space-around",
-    },
-}));
 
-// export default function NewRequestShifts(props) {
+
 const NewRequestShifts = ({ apiUsers, isLoading, error, fetchUsers, addRequestShift }) => {
-
     const classes = useStyles();
-    const classes2 = useStyles2();
     const [open, setOpen] = useState(false);
+    const [reqShift, setReqShift] = useState({ adminId: "60e5e3274ea83558e048270d", recieversIds: [], dateFrom: "", dateTo: "", shifts: [] });
     const [dates, setDates] = useState({ from: new Date(), to: new Date() });
-    const [fromDate, setFromDate] = useState(new Date());
-    const [toDate, setToDate] = useState(new Date());
-    const [generateShiftPeriod, setGenerateShiftPeriod] = useState(false);
     const [checkbox, setCheckbox] = useState([]);
-
-    function disableWeekends(date) {
-        return date.getDay() === 6;
-        // console.log(date.getDay() === 0 || date.getDay() === 6);
-    }
 
     useEffect(() => {
         fetchUsers()
     }, [])
 
+    useEffect(() => {
+        updateReqShift("recieversIds", apiUsers)
+    }, [apiUsers])
 
-    const handleSubmitReqShift = reqShiftForm => {
-        // reqShiftForm.reciever_ids = reqShiftForm.reciever_ids.map(user => user._id)
-        // addRequestShift(reqShiftForm)
-        console.log(reqShiftForm);
-    }
 
     useEffect(() => {
         const numberOfDates = dates.to.getDate() - dates.from.getDate();
-       
+
         const checkboxes = []
         const t = new Date(dates.from)
         for (let i = 0; i < numberOfDates + 1; i++) {
-            console.log(t.getDay());
             i > 0 ? t.setDate(t.getDate() + 1) : null;
             t.getDay() === 6 ? t.setDate(t.getDate() + 1) && i++ : null;
-            if (t.getDay() === 5) {
-                const checkboxesToAdd = {
-                    date: t.toLocaleDateString(),
-                    morningCheckbox: false,
-                    noonCheckbox: false,
-                    eveningCheckbox: "disabled",
-                }
-                checkboxes.push(checkboxesToAdd)
-            } else {
-                const checkboxesToAdd = {
-                    date: t.toLocaleDateString(),
-                    morningCheckbox: false,
-                    noonCheckbox: false,
-                    eveningCheckbox: false,
-                }
-                checkboxes.push(checkboxesToAdd)
+            const checkboxesToAdd = {
+                date: t.toLocaleDateString(),
+                morningCheckbox: false,
+                noonCheckbox: false,
+                eveningCheckbox: false,
             }
+            checkboxes.push(checkboxesToAdd)
         }
         setCheckbox(checkboxes)
     }, [dates])
 
+    const updateReqShift = (key, value) => setReqShift({ ...reqShift, [key]: value })
+
+    function disableWeekends(date) {
+        return date.getDay() === 6;
+    }
+
+    const handleSubmitReqShift = () => {
+        reqShift.recieversIds = reqShift.recieversIds.map(user => user._id)
+        reqShift.dateFrom = dates.from.toLocaleDateString()
+        reqShift.dateTo = dates.to.toLocaleDateString()
+        reqShift.shifts = checkbox
+        addRequestShift(reqShift)
+        setOpen(false);
+    }
+
     const handleDateChange = (date, name) => {
-        console.log(date.getDay());
-        console.log(name);
         setDates({ ...dates, [name]: date })
     };
 
-    const onSubmit = () => {
-        // props.submitMsg(msgForm)
-        // setOpen(false);
+    const handleCheckboxChange = (e, i) => {
+        let updateCheckbox = [...checkbox]
+        updateCheckbox[i][e.target.name] = e.target.checked
+        setCheckbox(checkbox[i] = updateCheckbox);
     };
 
     const handleClickOpen = () => {
-        // updateForm("reciever_ids", props.users)
         setOpen(true);
     };
 
@@ -162,22 +139,10 @@ const NewRequestShifts = ({ apiUsers, isLoading, error, fetchUsers, addRequestSh
     };
 
     const handleDelete = (i) => {
-        // let handleRecievers = [...msgForm.reciever_ids]
-        // handleRecievers.splice(i, 1)
-        // updateForm("reciever_ids", handleRecievers)
+        let handleRecievers = [...reqShift.recieversIds]
+        handleRecievers.splice(i, 1)
+        updateReqShift("recieversIds", handleRecievers)
     };
-
-    const handleClick = () => {
-        console.log('You clicked the Chip.');
-    };
-    // console.log(apiUsers);
-
-    const handleCheckboxChange = (event) => {
-        console.log([event.target.name]);
-        console.log("lol");
-        // setState([ ...checkbox, [event.target.name] = event.target.checked[1] ]);
-    };
-
 
     return (
         <div>
@@ -194,26 +159,18 @@ const NewRequestShifts = ({ apiUsers, isLoading, error, fetchUsers, addRequestSh
                                 label="From"
                                 format="dd/MM/yyyy"
                                 value={dates.from}
-                                // name="fromDate"
-                                // onChange={handleFromDateChange}
-                                // onChange={handleDateChange}
                                 onChange={e => handleDateChange(e, "from")}
                                 KeyboardButtonProps={{
                                     'aria-label': 'change date',
                                 }}
-                                // disabled={disableWeekends}
                                 shouldDisableDate={disableWeekends}
-                            // size="small"
                             />
                             <KeyboardDatePicker
-                                // size="small"
                                 margin="dense"
                                 id="date-picker-dialog2"
                                 label="To"
                                 format="dd/MM/yyyy"
                                 value={dates.to}
-                                // name="toDate"
-                                // onChange={handleToDateChange}
                                 onChange={e => handleDateChange(e, "to")}
                                 KeyboardButtonProps={{
                                     'aria-label': 'change date',
@@ -224,12 +181,11 @@ const NewRequestShifts = ({ apiUsers, isLoading, error, fetchUsers, addRequestSh
                     </MuiPickersUtilsProvider>
                     <DialogContentText>Recievers:</DialogContentText>
                     <Paper component="ul" className={classes.root}>
-                        {apiUsers.map((user, i) => {
+                        {reqShift.recieversIds.map((user, i) => {
                             return (
                                 <li key={i}>
                                     <Chip
                                         variant="outlined"
-                                        // avatar={msgForm.recievers ? <Avatar>{user.username.charAt(0)}</Avatar> : <Avatar>{}</Avatar>}
                                         label={user.username}
                                         onDelete={() => handleDelete(i)}
                                     />
@@ -237,34 +193,27 @@ const NewRequestShifts = ({ apiUsers, isLoading, error, fetchUsers, addRequestSh
                             );
                         })}
                     </Paper>
-                    {/* MuiFormGroup-root makeStyles-cb-6 MuiFormGroup-row */}
                     {checkbox.map((cb, i) => {
                         return (
-                            // <FormControl className={classes.formControl}>
                             <FormControl key={i} fullWidth >
                                 <FormLabel component="legend">{cb.date}</FormLabel>
                                 <Paper className={classes.paper}>
-                                    {/* <DialogContentText>lol</DialogContentText> */}
-
                                     <FormGroup row className={classes.formControl}>
                                         <FormControlLabel
-                                            control={<Checkbox checked={cb.morningCheckbox} onChange={handleCheckboxChange} color="primary" />}
+                                            control={
+                                                <Checkbox checked={cb.morningCheckbox} onChange={e => handleCheckboxChange(e, i)} color="primary" name="morningCheckbox" />}
                                             label="Morning"
                                         />
                                         <FormControlLabel
                                             control={
-                                                <Checkbox checked={cb.noonCheckbox} onChange={handleCheckboxChange} color="primary" />}
+                                                <Checkbox checked={cb.noonCheckbox} onChange={e => handleCheckboxChange(e, i)} color="primary" name="noonCheckbox" />}
                                             label="Noon"
                                         />
-                                        {cb.eveningCheckbox === "disabled" ?
-                                            <FormControlLabel disabled control={<Checkbox />} label="Evening" />
-                                            :
-                                            <FormControlLabel
-                                                control={
-                                                    <Checkbox checked={cb.eveningCheckbox} onChange={handleCheckboxChange} color="primary" />}
-                                                label="Evening"
-                                            />
-                                        }
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox checked={cb.eveningCheckbox} onChange={e => handleCheckboxChange(e, i)} color="primary" name="eveningCheckbox" />}
+                                            label="Evening"
+                                        />
                                     </FormGroup>
                                 </Paper>
 
@@ -272,11 +221,6 @@ const NewRequestShifts = ({ apiUsers, isLoading, error, fetchUsers, addRequestSh
 
                         )
                     })}
-
-                    {/* <FormGroup>
-                        <FormControlLabel disabled control={<Checkbox name="checkedD" />} label="Disabled" />
-                    </FormGroup> */}
-
                 </DialogContent>
                 <DialogActions className={classes.msgBtn}>
                     <Button className="msgBtn" onClick={handleClose} color="primary" >
@@ -292,16 +236,12 @@ const NewRequestShifts = ({ apiUsers, isLoading, error, fetchUsers, addRequestSh
 }
 
 const mapStateToProps = (state) => ({
-    // apiMsgs: state.msgs.msgs,
-    // isLoading: state.msgs.loading,
-    // error: state.msgs.error,
     apiUsers: state.users.users,
     isLoading: state.users.loading,
     error: state.users.error
 })
 
 const mapDispatchToProps = (dispatch) => ({
-    // fetchMsgs: () => dispatch(getMsgs()),
     fetchUsers: () => dispatch(getUsers()),
     addRequestShift: (reqShiftForm) => dispatch(addToDbReqShift(reqShiftForm)),
 })
