@@ -2,6 +2,7 @@ import React from "react"
 import Shifts from "./containers/Shifts"
 import Modals from "./containers/Modals/Modals";
 import NewRequestShifts from "./containers/NewRequestShifts/NewRequestShifts"
+import ScheduleShifts from "./containers/ScheduleShifts/ScheduleShifts"
 
 function App() {
     return (
@@ -11,6 +12,7 @@ function App() {
             <Shifts />
             <Modals />
             <NewRequestShifts />
+            <ScheduleShifts />
         </div>
     )
 }

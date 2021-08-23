@@ -7,6 +7,13 @@ export function getShifts(shifts) {
     }
 }
 
+export function getSubmittedShifts(submittedShifts) {
+    return {
+        type: type.GET_SUB_SHIFTS_REQUESTED,
+        payload: submittedShifts,
+    }
+}
+
 export function getUsers(users) {
     return {
         type: type.GET_USERS_REQUESTED,
