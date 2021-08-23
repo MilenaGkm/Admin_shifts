@@ -1,6 +1,7 @@
 import React from "react"
 import Shifts from "./containers/Shifts"
 import Modals from "./containers/Modals/Modals";
+import NewRequestShifts from "./containers/NewRequestShifts/NewRequestShifts"
 
 function App() {
     return (
@@ -9,6 +10,7 @@ function App() {
             <h3>Date : {new Date().toDateString()}</h3>
             <Shifts />
             <Modals />
+            <NewRequestShifts />
         </div>
     )
 }
