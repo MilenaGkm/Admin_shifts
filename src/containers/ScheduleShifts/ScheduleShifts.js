@@ -96,60 +96,61 @@ const ScheduleShifts = ({ apiUsers, apiSubmittedShifts, isLoading, error, state,
     const [open, setOpen] = useState(false);
     const [subShift, setSubShift] = useState([]);
     const [shiftsDate, setShiftsDate] = useState([]);
-    const [scheduledShifts, setScheduledShifts] = useState([]);
-    const [age, setAge] = React.useState('');
+    const [scheduledShifts, setScheduledShifts] = useState({ adminId: "", dateFrom: "", dateTo: "", shifts: [] });
+    const [age, setAge] = React.useState([]);
 
+    // console.log(subShift);
+    // console.log(apiSubmittedShifts);
 
-    const handleChange = (event) => {
-        console.log("---lol---");
-        console.log(event.target.value);
-        console.log("---lol---");
-        // setAge(event.target.value || '');
-    };
 
     const wantedShift = (value) => {
         return value === true
     }
-
-    const mornin = () => {
-        // return subShift.map(shift => shift.shifts)
-        console.log(subShift.map(shift => shift.shifts));
-    }
-
-
-    // console.log(mornin);
 
     useEffect(() => {
         fetchSubmittedShifts()
     }, [])
 
     useEffect(() => {
-        // setSubShift(apiSubmittedShifts.map(sub => sub.shifts))
-        setSubShift(apiSubmittedShifts)
+        (async () => {
+            let usersShifts = []
+            for (let shift of apiSubmittedShifts) {
+                let userShift = { userName: { ...apiUsers.find(user => user._id === shift.userId) }.username, userId: shift.userId, shifts: shift.shifts }
+                usersShifts.push(userShift)
+            }
+            setSubShift(usersShifts)
+
+            let shifts = []
+            for (let i = 0; i < apiSubmittedShifts[0].shifts.length; i++) {
+                let shift = {
+                    date: apiSubmittedShifts[0].shifts[i].date,
+                    morning: "",
+                    noon: "",
+                    evening: ""
+                }
+                shifts.push(shift)
+            }
+
+            let schedule = {
+                adminId: apiSubmittedShifts[0].shifts[0].adminId,
+                dateFrom: apiSubmittedShifts[0].shifts[0].date,
+                dateTo: apiSubmittedShifts[0].shifts[apiSubmittedShifts[0].shifts.length - 1].date,
+                shifts: shifts
+            }
+            setScheduledShifts(schedule)
+        })()
     }, [apiSubmittedShifts])
 
-    useEffect(() => {
-        (async () => {
-            const shift = await { ...subShift[0] }.shifts.map(shift => shift.date)
-            setShiftsDate(shift)
-        })()
-        // setSubShift(apiSubmittedShifts.map(sub => sub.shifts))
-        // setSubShift(apiSubmittedShifts)
-    }, [subShift])
-
-    // const dates = apiSubmittedShifts.map(sub => sub.shifts).map(shift => shift.date)
-    const dates = apiSubmittedShifts[0]
-
-    // const morninShift = subShift.filter(shift => shift.shifts.filter(s => s.morningCheckbox === true)).map(shift => shift.userId)
-    // // const morninShift = subShift.map(shift => shift.shifts.filter(s => s.morningCheckbox === true))
-    // const noonShift = subShift.map(shift => shift.shifts.filter(s => s.noonCheckbox === true))
-    // // const eveShift = subShift.map(shift => shift.shifts.filter(s => s.eveningCheckbox === true))
-    // const eveShift = subShift.find(shift => shift.shifts.map(s => s.eveningCheckbox === true).map(shift => shift.userId))
-    // console.log(morninShift);
-    // console.log(noonShift);
-    // console.log(eveShift);
-
+    
+    const handleChange = (event, i, time) => {
+        let newScheduledShifts = {... scheduledShifts}
+        newScheduledShifts.shifts[i][time] = event.target.value
+        setScheduledShifts( newScheduledShifts )
+    };
+    
+    // console.log(scheduledShifts);
     const submitScheduledShifts = () => {
+        console.log(scheduledShifts);
         setOpen(false);
     }
 
@@ -160,6 +161,7 @@ const ScheduleShifts = ({ apiUsers, apiSubmittedShifts, isLoading, error, state,
     const handleClose = () => {
         setOpen(false);
     };
+
     return (
         <div>
             <Button onClick={handleClickOpen}>Schedule Shifts</Button>
@@ -169,38 +171,82 @@ const ScheduleShifts = ({ apiUsers, apiSubmittedShifts, isLoading, error, state,
                     <form className={classes.container}>
                         {subShift.map((shift, i) => {
                             return (
-
-                                <Paper className={classes.paper}>
-                                    <FormLabel component="legend">{shiftsDate[i]}</FormLabel>
-                                    {shift.shifts.map((s, k) => {
-                                        // s.eveningCheckbox ? console.log(apiUsers.find(user => user._id == shift.userId).username) : console.log("no");
-                                        return (
-
-                                            <FormControl variant="outlined" className={classes.formControl}>
-                                                {/* <DialogTitle>{s.date}</DialogTitle> */}
-                                                {/* <FormGroup row > */}
-                                                <InputLabel id="demo-dialog-select-label">{k == 0 ? "Morning" : k == 1 ? "Noon" : "Evening"} </InputLabel>
-                                                <Select
-                                                    // label="lol"
-                                                    className={classes.select}
-                                                    fullWidth
-                                                    labelId="demo-simple-select-outlined-label"
-                                                    id="demo-simple-select-outlined"
-                                                    value={age}
-                                                    onChange={handleChange}
-                                                // input={<Input />}
-                                                >
-                                                    <MenuItem value="">
-                                                        <em>None</em>
-                                                    </MenuItem>
-                                                    <MenuItem value={10}>Ten</MenuItem>
-                                                    <MenuItem value={20}>Twenty</MenuItem>
-                                                    <MenuItem value={30}>Thirty</MenuItem>
-                                                </Select>
-                                                {/* </FormGroup> */}
-                                            </FormControl>
-                                        )
-                                    })}
+                                <Paper key={i} className={classes.paper}>
+                                    <FormLabel component="legend">{shift.shifts[i].date}</FormLabel>
+                                    <FormControl variant="outlined" className={classes.formControl}>
+                                        <InputLabel id="demo-dialog-select-label">Morning</InputLabel>
+                                        <Select
+                                            // label="lol"
+                                            className={classes.select}
+                                            fullWidth
+                                            // multiple
+                                            labelId="demo-simple-select-outlined-label"
+                                            id="demo-simple-select-outlined"
+                                            value={scheduledShifts.shifts[i].morning}
+                                            onChange={e => handleChange(e, i, "morning")}
+                                            input={<Input />}
+                                        >
+                                            <MenuItem value={""}>
+                                                <em>None</em>
+                                            </MenuItem>
+                                            {shift.shifts.map((s, k) => {
+                                                return (
+                                                    subShift[k].shifts[i].morningCheckbox ?
+                                                        // <MenuItem value={[subShift[k].userId, subShift[k].shifts[i].date, i, "morning"]}>{subShift[k].userName}</MenuItem> : null
+                                                        // <MenuItem name={subShift[k].userName} value={subShift[k].userId}>{subShift[k].userName}</MenuItem> : null
+                                                        <MenuItem key={k} value={subShift[k].userId}>{subShift[k].userName}</MenuItem> : null
+                                                )
+                                            })}
+                                        </Select>
+                                    </FormControl>
+                                    <FormControl variant="outlined" className={classes.formControl}>
+                                        <InputLabel id="demo-dialog-select-label">Noon</InputLabel>
+                                        <Select
+                                            // label="lol"
+                                            className={classes.select}
+                                            fullWidth
+                                            // multiple
+                                            labelId="demo-simple-select-outlined-label"
+                                            id="demo-simple-select-outlined"
+                                            value={scheduledShifts.shifts[i].noon}
+                                            onChange={e => handleChange(e, i, "noon")}
+                                            input={<Input />}
+                                        >
+                                            <MenuItem value={""}>
+                                                <em>None</em>
+                                            </MenuItem>
+                                            {shift.shifts.map((s, k) => {
+                                                return (
+                                                    subShift[k].shifts[i].noonCheckbox ?
+                                                        <MenuItem key={k} value={subShift[k].userId}>{subShift[k].userName}</MenuItem> : null
+                                                )
+                                            })}
+                                        </Select>
+                                    </FormControl>
+                                    <FormControl variant="outlined" className={classes.formControl}>
+                                        <InputLabel id="demo-dialog-select-label">Evening</InputLabel>
+                                        <Select
+                                            // label="lol"
+                                            className={classes.select}
+                                            fullWidth
+                                            // multiple
+                                            labelId="demo-simple-select-outlined-label"
+                                            id="demo-simple-select-outlined"
+                                            value={scheduledShifts.shifts[i].evening}
+                                            onChange={e => handleChange(e, i, "evening")}
+                                            input={<Input />}
+                                        >
+                                            <MenuItem value={""}>
+                                                <em>None</em>
+                                            </MenuItem>
+                                            {shift.shifts.map((s, k) => {
+                                                return (
+                                                    subShift[k].shifts[i].eveningCheckbox ?
+                                                        <MenuItem key={k} value={subShift[k].userId}>{subShift[k].userName}</MenuItem> : null
+                                                )
+                                            })}
+                                        </Select>
+                                    </FormControl>
                                 </Paper>
                             )
                         })}
@@ -210,7 +256,7 @@ const ScheduleShifts = ({ apiUsers, apiSubmittedShifts, isLoading, error, state,
                     <Button onClick={handleClose} color="primary">
                         Cancel
                     </Button>
-                    <Button onClick={handleClose} color="primary">
+                    <Button onClick={submitScheduledShifts} color="primary">
                         Ok
                     </Button>
                 </DialogActions>
