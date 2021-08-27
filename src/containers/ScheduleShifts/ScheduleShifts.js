@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { connect } from "react-redux";
-import { getSubmittedShifts, addToDbScheduledShifts } from '../../redux/actions/shifts';
+import { getSubmittedShifts, getScheduledShifts, addToDbScheduledShifts } from '../../redux/actions/shifts';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -91,7 +91,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const ScheduleShifts = ({ apiUsers, apiSubmittedShifts, isLoading, error, state, fetchSubmittedShifts, addRequestShift }) => {
+const ScheduleShifts = ({ apiUsers, apiSubmittedShifts, isLoading, error, state, fetchSubmittedShifts, fetchScheduledShifts, addScheduledShifts }) => {
     const classes = useStyles();
     const [open, setOpen] = useState(false);
     const [subShift, setSubShift] = useState([]);
@@ -99,6 +99,7 @@ const ScheduleShifts = ({ apiUsers, apiSubmittedShifts, isLoading, error, state,
     const [scheduledShifts, setScheduledShifts] = useState({ adminId: "", dateFrom: "", dateTo: "", shifts: [] });
     const [age, setAge] = React.useState([]);
 
+    // console.log(state);
     // console.log(subShift);
     // console.log(apiSubmittedShifts);
 
@@ -109,6 +110,7 @@ const ScheduleShifts = ({ apiUsers, apiSubmittedShifts, isLoading, error, state,
 
     useEffect(() => {
         fetchSubmittedShifts()
+        fetchScheduledShifts()
     }, [])
 
     useEffect(() => {
@@ -150,7 +152,10 @@ const ScheduleShifts = ({ apiUsers, apiSubmittedShifts, isLoading, error, state,
     
     // console.log(scheduledShifts);
     const submitScheduledShifts = () => {
+        console.log("==========schedule---component==========");
         console.log(scheduledShifts);
+        console.log("==========schedule---component==========");
+        addScheduledShifts(scheduledShifts)
         setOpen(false);
     }
 
@@ -275,7 +280,8 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
     fetchSubmittedShifts: () => dispatch(getSubmittedShifts()),
-    // addScheduledShifts: (scheduledShiftsForm) => dispatch(addToDbScheduledShifts(scheduledShiftsForm)),
+    fetchScheduledShifts: () => dispatch(getScheduledShifts()),
+    addScheduledShifts: (schedule) => dispatch(addToDbScheduledShifts(schedule)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ScheduleShifts);

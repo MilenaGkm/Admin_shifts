@@ -27,3 +27,17 @@ export function addToDbReqShift(reqShiftForm) {
         payload: reqShiftForm,
     }
 }
+
+export function getScheduledShifts(schedule) {
+    return {
+        type: type.GET_SCHEDULED_SHIFTS_REQUESTED,
+        payload: schedule,
+    }
+}
+
+export function addToDbScheduledShifts(schedule) {
+    return {
+        type: type.ADD_SCHEDULED_SHIFTS_REQUESTED,
+        payload: schedule,
+    }
+}
